@@ -8,12 +8,12 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+// , check over add.
 
 public class BinarySearchTree<Type extends Comparable<? super Type>> implements SortedSet<Type>{
 	
 	private BinaryNode<Type> root;
 	private int size;
-	private Type item;
 	
 	
 	public BinarySearchTree()
@@ -22,87 +22,104 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		size=0;
 	}
 	
-	public BinarySearchTree(Type item)
+	public BinarySearchTree(Type item) // TA note: do we need this?
 	{
 	
-		this.item= item;
+		this.root.element = item;
 		
 		this.updateSize(1);
-		root.leftChild=null;
-		root.rightChild=null;
+		this.root.leftChild=null;
+		this.root.rightChild=null;
 		
 	}
 
 	@Override
-	public boolean add(Type item) {
-		if(root.size()==0)
+	public boolean add(Type item) 
+	{	
+		this.updateSize(1);
+		return this.root.recAdd(root, item);
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends Type> items) 
+	{
+		boolean result = true;
+		
+		for(Type V : items)
 		{
-			root = new BinarySearchTree(item);
-			return true;
+			result = result && add(V);
 		}
 		
-		
-		return false;
+		return result;
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends Type> items) {
-		// TODO Auto-generated method stub
-		return false;
+	public void clear() 
+	{
+		this.root = null; 	//Ask TA: do we need to do anything else in this method?
+		this.size = 0;
 	}
 
 	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean contains(Type item) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean contains(Type item) //driver method
+	{
+		return this.root.recContains(item);
 	}
 
 	@Override
 	public boolean containsAll(Collection<? extends Type> items) {
+		boolean result = false;
+		
+		for(Type V : items)
+		{
+			result = result || contains(V);
+		}
+		
+		return result;
+	}
+
+	@Override
+	public Type first() throws NoSuchElementException 
+	{
+		if(root == null) //TA note: check that this is the parameter we should be checking for.
+			throw new NoSuchElementException();
+		
+		return this.root.recFirst();
+	}
+
+	@Override
+	public boolean isEmpty() 
+	{
+		return root == null;
+	}
+
+	@Override
+	public Type last() throws NoSuchElementException 
+	{
+		if(root == null) //TA note: check that this is the parameter we should be checking for.
+			throw new NoSuchElementException();
+		
+		return this.root.recLast();
+	}
+
+	@Override
+	public boolean remove(Type item) 
+	{
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public Type first() throws NoSuchElementException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean isEmpty() {
+	public boolean removeAll(Collection<? extends Type> items) 
+	{
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public Type last() throws NoSuchElementException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean remove(Type item) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean removeAll(Collection<? extends Type> items) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+	public int size() 
+	{
+		return size;
 	}
 
 	@Override
@@ -111,16 +128,14 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		return null;
 	}
 	
-	public void updateSize(int n)
+	private void updateSize(int n)
 	{
 		this.size+=n;
 	}
-	public int getSize()
-	{
-		return this.size;
-	}
-	
-	private class BinaryNode<T>
+//--------------------------------------------------------------------------------------------
+//									BinaryNode Class
+//--------------------------------------------------------------------------------------------
+	private class BinaryNode<T extends Comparable<? super T>>
 	{
 		private T element;
 
@@ -312,7 +327,7 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		 * @param filename - output file name
 		 * @param root - the root of the binary tree
 		 */
-		public void <T> void generateDotFile(String filename, BinaryNode<T> root) { //TA
+		public <G> void generateDotFile(String filename, BinaryNode<T> root) { //TA
 			try {
 				PrintWriter out = new PrintWriter(filename);
 				out.println("digraph Tree {\n\tnode [shape=record]\n");
@@ -331,17 +346,56 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 		}
 		
 		
-		public boolean recAdd(BinaryNode<T> root , T key)
+		public boolean recAdd(BinaryNode<T> root, T key)
 		{
-			if(root.equals(null))
+			if(root.equals(null)) //element doesn't exist so we are adding it.
 			{
-				
+				root = new BinaryNode<T>(key);
+				return true;
 			}
 			
-			if(key)
+			if(key.compareTo(root.element()) == 0) //element already exists in tree.
+			{
+				return false;
+			}
+			else if(key.compareTo(root.element) > 0) // continue right if positive val, or left if negative val.
+			{
+				return rightChild.recAdd(root, key);
+			}
+			else
+			{
+				return leftChild.recAdd(root,key);
+			}
 		}
 		
+		public boolean recContains(T key)
+		{
+			if(this.equals(null))
+				return false;
+			
+			if(key.compareTo(this.element) == 0)
+				return true;
+			else if(key.compareTo(this.element) > 0)
+				return rightChild.recContains(key);
+			else
+				return leftChild.recContains(key);
+		}
 		
+		public T recFirst()
+		{
+			if(this.leftChild() == null)
+				return this.element();
+			else
+				return leftChild().recFirst();
+		}
+		
+		public T recLast()
+		{
+			if(this.rightChild() == null)
+				return this.element();
+			else
+				return rightChild().recLast();
+		}
 		
 	}
 
