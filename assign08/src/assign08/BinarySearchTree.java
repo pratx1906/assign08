@@ -5,26 +5,30 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 // , check over add.
 
+
 public class BinarySearchTree<Type extends Comparable<? super Type>> implements SortedSet<Type>{
 	
 	private BinaryNode<Type> root;
 	private int size;
+	private ArrayList<Type>  binaryArray;
 	
 	
 	public BinarySearchTree()
 	{
+		this.binaryArray = new ArrayList<Type>();
 		root = null;
 		size=0;
 	}
 	
 	public BinarySearchTree(Type item) // TA note: do we need this?
 	{
-	
+		this.binaryArray = new ArrayList<Type>();
 		this.root.element = item;
 		
 		this.updateSize(1);
@@ -105,7 +109,7 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	@Override
 	public boolean remove(Type item) 
 	{
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -123,9 +127,13 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	}
 
 	@Override
-	public ArrayList<Type> toArrayList() {
-		// TODO Auto-generated method stub
-		return null;
+	public ArrayList<Type> toArrayList() 
+	{
+		ArrayList<Type> result = new ArrayList<Type>();
+		
+		result = root.recToArray();
+		
+		return result;
 	}
 	
 	private void updateSize(int n)
@@ -138,6 +146,7 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 	private class BinaryNode<T extends Comparable<? super T>>
 	{
 		private T element;
+		
 
 		private BinaryNode<T> leftChild;
 
@@ -397,10 +406,16 @@ public class BinarySearchTree<Type extends Comparable<? super Type>> implements 
 				return rightChild().recLast();
 		}
 		
+		private ArrayList<T> recToArray(ArrayList<T> input)
+		{
+			
+			if(leftChild != null)
+			{
+				input.addAll(leftChild.recToArray());
+			}
+			
+		}		
+		
 	}
 
-
-
-	}
-
-
+}
